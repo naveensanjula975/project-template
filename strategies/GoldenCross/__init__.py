@@ -30,15 +30,25 @@ class GoldenCross(Strategy):
     def should_cancel_entry(self) -> bool:
         return True
 
+    @property
+    def atr(self):
+        return ta.atr(self.candles, 14)
+
     def go_long(self):
         entry_price = self.price
         qty = utils.size_to_qty(self.capital, entry_price)
         self.buy = qty, entry_price
+        
+        self.stop_loss = qty, entry_price - (self.atr * 2)
+        self.take_profit = qty, entry_price + (self.atr * 4)
 
     def go_short(self):
         entry_price = self.price
         qty = utils.size_to_qty(self.capital, entry_price)
         self.sell = qty, entry_price
+        
+        self.stop_loss = qty, entry_price + (self.atr * 2)
+        self.take_profit = qty, entry_price - (self.atr * 4)
 
     def update_position(self):
         if self.is_long and self.fast_sma < self.slow_sma:
